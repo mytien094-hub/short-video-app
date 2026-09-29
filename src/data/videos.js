@@ -18,6 +18,15 @@ const videos = [
       "https://assets.marmel.ai/streaming/image/6a0ad680de3e139ee3e7b52b/720p.webp",
     author: "Film Channel",
   },
+  {
+    id: 3,
+    title: "Sample MP4 Video",
+    author: "Learning Container",
+    videoUrl:
+      "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
+    thumbnail:
+      "https://images.pexels.com/photos/1183099/pexels-photo-1183099.jpeg",
+  },
 ];
 
 export default videos;

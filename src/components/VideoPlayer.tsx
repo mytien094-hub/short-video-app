@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from "react";
-import { StyleSheet, View, Platform } from "react-native";
+import React, { useEffect } from "react";
+import { StyleSheet, View } from "react-native";
 import { useVideoPlayer, VideoView } from "expo-video";
 
 interface VideoPlayerProps {
@@ -11,65 +11,18 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   videoUrl,
   isActive,
 }) => {
-  // =========================
-  // WEB
-  // =========================
-  const webVideoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    if (Platform.OS !== "web") return;
-
-    const video = webVideoRef.current;
-
-    if (!video) return;
-
-    if (isActive) {
-      video.play().catch((error) => {
-        console.log("Video play error:", error);
-      });
-    } else {
-      video.pause();
-    }
-  }, [isActive]);
-
-  if (Platform.OS === "web") {
-    return (
-      <View style={styles.container}>
-        <video
-          ref={webVideoRef}
-          src={videoUrl}
-          controls
-          playsInline
-          muted
-          loop
-          preload="auto"
-          autoPlay={isActive}
-          style={styles.webVideo}
-          onLoadedData={() => {
-            console.log("Video loaded:", videoUrl);
-          }}
-          onError={(e) => {
-            console.log("VIDEO ERROR:", e.currentTarget.error);
-            console.log("VIDEO URL:", videoUrl);
-          }}
-        />
-      </View>
-    );
-  }
-
-  // =========================
-  // ANDROID / IOS
-  // =========================
-
-  const player = useVideoPlayer(videoUrl, (player) => {
-    player.loop = true;
-    player.muted = true;
+  const player = useVideoPlayer(videoUrl, (p) => {
+    p.loop = true;
+    p.muted = false; // Mở âm thanh mặc định
+    p.volume = 1;
   });
 
   useEffect(() => {
     if (!player) return;
 
     if (isActive) {
+      player.muted = false; // Đảm bảo bỏ Mute mỗi khi active
+      player.volume = 1.0;
       player.play();
     } else {
       player.pause();
@@ -78,7 +31,13 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
   return (
     <View style={styles.container}>
-      <VideoView style={styles.video} player={player} nativeControls={true} />
+      <VideoView
+        style={styles.video}
+        player={player}
+        nativeControls={true}
+        contentFit="contain"
+        allowsPictureInPicture={false}
+      />
     </View>
   );
 };
@@ -89,16 +48,8 @@ const styles = StyleSheet.create({
     height: "100%",
     backgroundColor: "#000",
   },
-
   video: {
     width: "100%",
     height: "100%",
-  },
-
-  webVideo: {
-    width: "100%",
-    height: "100%",
-    objectFit: "contain",
-    backgroundColor: "#000",
   },
 });
