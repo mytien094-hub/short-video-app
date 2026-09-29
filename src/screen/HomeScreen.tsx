@@ -10,7 +10,7 @@ import {
   StatusBar,
 } from "react-native";
 import { VideoPlayer } from "../components/VideoPlayer";
-import { videos } from "../data/videos"; // Import data từ file riêng
+import videos from "../data/videos";
 
 const { height: WINDOW_HEIGHT } = Dimensions.get("window");
 
@@ -35,7 +35,7 @@ export default function HomeScreen() {
 
     return (
       <View style={styles.videoContainer}>
-        <VideoPlayer videoUrl={item.videoUrl} autoPlay={isPlaying} />
+        <VideoPlayer videoUrl={item.videoUrl} isActive={isPlaying} />
 
         <View style={styles.overlay}>
           <Text style={styles.authorText}>@{item.author}</Text>
