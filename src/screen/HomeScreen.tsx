@@ -9,13 +9,30 @@ import {
   SafeAreaView,
   StatusBar,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native"; // Thêm hook lắng nghe focus
 import { VideoPlayer } from "../components/VideoPlayer";
 import videos from "../data/videos";
 
 const { height: WINDOW_HEIGHT } = Dimensions.get("window");
 
-export default function HomeScreen() {
+export default function HomeScreen({ route }: any) {
+  const flatListRef = useRef<FlatList>(null);
   const [activeVideoId, setActiveVideoId] = useState<number>(videos[0].id);
+
+  // Tự động cuộn tới video được chọn mỗi khi HomeScreen được Focus
+  useFocusEffect(
+    useCallback(() => {
+      const selectedVideoId = route?.params?.selectedVideoId;
+
+      if (selectedVideoId) {
+        const index = videos.findIndex((v) => v.id === selectedVideoId);
+        if (index !== -1 && flatListRef.current) {
+          flatListRef.current.scrollToIndex({ index, animated: true });
+          setActiveVideoId(selectedVideoId);
+        }
+      }
+    }, [route?.params?.selectedVideoId]),
+  );
 
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
@@ -29,6 +46,12 @@ export default function HomeScreen() {
   const viewabilityConfig = useRef({
     itemVisiblePercentThreshold: 60,
   }).current;
+
+  const getItemLayout = (_: any, index: number) => ({
+    length: WINDOW_HEIGHT,
+    offset: WINDOW_HEIGHT * index,
+    index,
+  });
 
   const renderVideoItem = ({ item }: { item: (typeof videos)[0] }) => {
     const isPlaying = item.id === activeVideoId;
@@ -49,9 +72,11 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
       <FlatList
+        ref={flatListRef} // FIXED: Đã gắn ref
         data={videos}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderVideoItem}
+        getItemLayout={getItemLayout} // FIXED: Đã gắn getItemLayout
         pagingEnabled={true}
         decelerationRate="fast"
         showsVerticalScrollIndicator={false}

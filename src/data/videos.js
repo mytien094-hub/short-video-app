@@ -4,7 +4,8 @@ const videos = [
     title: "Big Buck Bunny",
     videoUrl:
       "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4",
-    thumbnail: "https://images.unsplash.com/photo-1498049794561-7780e7231661",
+    thumbnail:
+      "https://4kmedia.org/wp-content/uploads/2017/01/big-buck-bunny-thumbnail.jpg",
     author: "Animation Channel",
   },
 
@@ -13,7 +14,8 @@ const videos = [
     title: "Sintel",
     videoUrl:
       "https://test-videos.co.uk/vids/sintel/mp4/h264/720/Sintel_720_10s_2MB.mp4",
-    thumbnail: "https://images.unsplash.com/photo-1519608487953-e999c86e7455",
+    thumbnail:
+      "https://assets.marmel.ai/streaming/image/6a0ad680de3e139ee3e7b52b/720p.webp",
     author: "Film Channel",
   },
 ];
