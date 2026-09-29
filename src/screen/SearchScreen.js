@@ -7,14 +7,23 @@ import {
     Image,
     StyleSheet,
     TouchableOpacity,
+    StatusBar,
+    Platform,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
+// Import dữ liệu video (Logic của Thành viên B)
 import videos from "../data/videos";
 
-export default function SearchScreen() {
+export default function SearchScreen({ navigation }) {
     const [keyword, setKeyword] = useState("");
 
-    // Lọc video theo tên video hoặc tác giả
+    // Chuyển sang màn hình Home (Logic của Thành viên C) - GIỮ NGUYÊN
+    const handleSelectVideo = (videoId) => {
+        navigation.navigate("Home", { selectedVideoId: videoId });
+    };
+
+    // Lọc video theo từ khóa (Logic của Thành viên B) - GIỮ NGUYÊN
     const filteredVideos = videos.filter((video) => {
         const searchText = keyword.toLowerCase().trim();
 
@@ -28,22 +37,27 @@ export default function SearchScreen() {
         );
     });
 
+    // Giao diện Thẻ Video (UI của Thành viên A)
     const renderVideo = ({ item }) => {
         return (
-            <TouchableOpacity style={styles.card}>
-                <Image
-                    source={{ uri: item.thumbnail }}
-                    style={styles.thumbnail}
-                />
+            <TouchableOpacity
+                style={styles.card}
+                activeOpacity={0.7}
+                onPress={() => handleSelectVideo(item.id)}
+            >
+                <Image source={{ uri: item.thumbnail }} style={styles.thumbnail} />
 
                 <View style={styles.info}>
                     <Text style={styles.title} numberOfLines={2}>
                         {item.title}
                     </Text>
 
-                    <Text style={styles.author}>
-                        {item.author}
-                    </Text>
+                    <Text style={styles.author}>@{item.author}</Text>
+
+                    <View style={styles.playBadge}>
+                        <Ionicons name="play-circle" size={14} color="#007AFF" />
+                        <Text style={styles.playText}>Bấm để xem video</Text>
+                    </View>
                 </View>
             </TouchableOpacity>
         );
@@ -51,24 +65,32 @@ export default function SearchScreen() {
 
     return (
         <View style={styles.container}>
-            {/* Tiêu đề */}
+            <StatusBar barStyle="dark-content" backgroundColor="#f5f5f5" />
+
             <Text style={styles.header}>Tìm kiếm video</Text>
 
-            {/* Ô tìm kiếm */}
-            <TextInput
-                style={styles.searchInput}
-                placeholder="Tìm video hoặc tác giả..."
-                placeholderTextColor="#999"
-                value={keyword}
-                onChangeText={setKeyword}
-            />
+            {/* THANH TÌM KIẾM ĐÃ NÂNG CẤP UI (MEMBER A) */}
+            <View style={styles.searchBoxContainer}>
+                <Ionicons name="search" size={20} color="#888" style={styles.searchIcon} />
+                <TextInput
+                    style={styles.searchInput}
+                    placeholder="Tìm video hoặc tác giả..."
+                    placeholderTextColor="#999"
+                    value={keyword}
+                    onChangeText={setKeyword}
+                />
+                {/* Nút xóa nhanh (dấu X) xuất hiện khi gõ chữ */}
+                {keyword.length > 0 && (
+                    <TouchableOpacity onPress={() => setKeyword("")} style={styles.clearBtn}>
+                        <Ionicons name="close-circle" size={20} color="#999" />
+                    </TouchableOpacity>
+                )}
+            </View>
 
-            {/* Số lượng kết quả */}
             <Text style={styles.resultText}>
-                {filteredVideos.length} video được tìm thấy
+                Tìm thấy <Text style={styles.highlightCount}>{filteredVideos.length}</Text> video phù hợp
             </Text>
 
-            {/* Danh sách video */}
             <FlatList
                 data={filteredVideos}
                 keyExtractor={(item) => item.id.toString()}
@@ -76,9 +98,8 @@ export default function SearchScreen() {
                 showsVerticalScrollIndicator={false}
                 ListEmptyComponent={
                     <View style={styles.empty}>
-                        <Text style={styles.emptyText}>
-                            Không tìm thấy video phù hợp
-                        </Text>
+                        <Ionicons name="search-disagree" size={50} color="#ccc" />
+                        <Text style={styles.emptyText}>Không tìm thấy video phù hợp</Text>
                     </View>
                 }
             />
@@ -91,83 +112,103 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#f5f5f5",
         paddingHorizontal: 16,
-        paddingTop: 50,
+        paddingTop: Platform.OS === "android" ? 40 : 50,
     },
-
     header: {
-        fontSize: 26,
+        fontSize: 24,
         fontWeight: "bold",
         color: "#111",
-        marginBottom: 18,
+        marginBottom: 16,
     },
 
-    searchInput: {
-        height: 48,
+    /* STYLE THANH TÌM KIẾM MỚI */
+    searchBoxContainer: {
+        flexDirection: "row",
+        alignItems: "center",
         backgroundColor: "#fff",
         borderRadius: 12,
-        paddingHorizontal: 16,
-        fontSize: 16,
+        paddingHorizontal: 12,
         borderWidth: 1,
         borderColor: "#ddd",
+        height: 48,
+    },
+    searchIcon: {
+        marginRight: 8,
+    },
+    searchInput: {
+        flex: 1,
+        fontSize: 15,
+        color: "#222",
+        height: "100%",
+    },
+    clearBtn: {
+        padding: 4,
     },
 
     resultText: {
-        fontSize: 14,
-        color: "#777",
-        marginTop: 14,
-        marginBottom: 10,
+        fontSize: 13,
+        color: "#666",
+        marginTop: 12,
+        marginBottom: 12,
+    },
+    highlightCount: {
+        fontWeight: "bold",
+        color: "#007AFF",
     },
 
+    /* STYLE THẺ VIDEO MỚI */
     card: {
         flexDirection: "row",
         backgroundColor: "#fff",
         borderRadius: 12,
         marginBottom: 12,
         padding: 10,
-
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.08,
-        shadowRadius: 4,
-
         elevation: 2,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 4,
     },
-
     thumbnail: {
-        width: 130,
-        height: 80,
+        width: 120,
+        height: 75,
         borderRadius: 8,
-        backgroundColor: "#ddd",
+        backgroundColor: "#eee",
     },
-
     info: {
         flex: 1,
         marginLeft: 12,
-        justifyContent: "center",
+        justifyContent: "space-between",
     },
-
     title: {
-        fontSize: 16,
+        fontSize: 15,
         fontWeight: "600",
         color: "#222",
-        marginBottom: 8,
+        lineHeight: 20,
     },
-
     author: {
-        fontSize: 14,
-        color: "#777",
+        fontSize: 13,
+        color: "#666",
+    },
+    playBadge: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    playText: {
+        fontSize: 11,
+        color: "#007AFF",
+        fontWeight: "600",
+        marginLeft: 4,
     },
 
+    /* STYLE KHI TRỐNG */
     empty: {
         alignItems: "center",
         marginTop: 60,
     },
-
     emptyText: {
-        fontSize: 16,
+        fontSize: 15,
         color: "#888",
+        marginTop: 10,
     },
 });
